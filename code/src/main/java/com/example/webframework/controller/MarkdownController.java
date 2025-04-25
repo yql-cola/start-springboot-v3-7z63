@@ -21,7 +21,7 @@ public class MarkdownController {
         StringBuilder markdown = new StringBuilder();
 
         try {
-            Map<String, Object> map = objectMapper.readValue(inputJson, new TypeReference<>() {});
+            Map<String, Object> map = objectMapper.readValue(inputJson, new TypeReference<Map<String, Object>>() {});
 
             // 表头
             markdown.append("| Key | Value |\n");
