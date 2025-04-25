@@ -16,19 +16,23 @@ public class MarkdownController {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @PostMapping(value = "/to-markdown", consumes = MediaType.TEXT_PLAIN_VALUE)
-    public String convertJsonToMarkdown(@RequestBody String inputJson) {
-        StringBuilder markdown = new StringBuilder();
-
+    @PostMapping(value = "/to-markdown")
+    public String convertJsonToMarkdown(@RequestBody Map<String,String> input) {
         try {
-            Map<String, Object> map = objectMapper.readValue(inputJson, new TypeReference<Map<String, Object>>() {});
+            String jsonString = input.get("json");
+            if (jsonString == null || jsonString.isEmpty()) {
+                return "Missing 'json' field in request.";
+            }
 
-            // 表头
+            // 将字符串解析为 Map
+            Map<String, Object> data = objectMapper.readValue(jsonString, Map.class);
+
+            // 构建 Markdown 表格
+            StringBuilder markdown = new StringBuilder();
             markdown.append("| Key | Value |\n");
             markdown.append("|-----|-------|\n");
 
-            // 遍历 JSON 构建表格
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
+            for (Map.Entry<String, Object> entry : data.entrySet()) {
                 markdown.append("| ")
                         .append(entry.getKey())
                         .append(" | ")
@@ -36,10 +40,10 @@ public class MarkdownController {
                         .append(" |\n");
             }
 
-        } catch (Exception e) {
-            return "解析 JSON 失败: " + e.getMessage();
-        }
+            return markdown.toString();
 
-        return markdown.toString();
+        } catch (Exception e) {
+            return "Failed to parse input JSON: " + e.getMessage();
+        }
     }
 }
